@@ -16,8 +16,8 @@
    ```
 2. Запусти сервис:
    ```bash
-   go run ./cmd/server
-   ```
+  go run ./cmd/server
+  ```
    По умолчанию слушает `:8080` (переменная `HTTP_ADDR`), DSN берётся из `DATABASE_URL`.
 3. Проверка: `curl http://localhost:8080/health`.
 
@@ -34,7 +34,7 @@ docker compose up --build
 - `make run` — запустить с текущими `HTTP_ADDR`/`DATABASE_URL`.
 - `make test` — `go test ./...`.
 - `make docker-build` — собрать docker-образ `pr-reviewer-service:local`.
-- `make compose-up` / `make compose-down` — поднять/остановить docker-compose с очисткой volume.
+  - `make compose-up` / `make compose-down` — поднять/остановить docker-compose с очисткой volume.
 
 ## API
 - Спецификация: `openapi.yaml`.
@@ -49,6 +49,14 @@ docker compose up --build
     -d '{"pull_request_id":"pr1","pull_request_name":"feat","author_id":"u1"}'
 
   curl "http://localhost:8080/users/getReview?user_id=u2"
+
+  # Массово деактивировать команду и попытаться переназначить ревьюверов в открытых PR
+  curl -X POST http://localhost:8080/team/deactivate \
+    -H "Content-Type: application/json" \
+    -d '{"team_name":"backend"}'
+
+  # Простая статистика назначений ревьюверов
+  curl http://localhost:8080/stats/reviewerAssignments
   ```
 
 ## Допущения и заметки
