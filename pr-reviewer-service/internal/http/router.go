@@ -10,6 +10,7 @@ func NewRouter(h *Handler) http.Handler {
 	mux.HandleFunc("/health", h.Health)
 	mux.HandleFunc("/team/add", h.AddTeam)
 	mux.HandleFunc("/team/get", h.GetTeam)
+	mux.HandleFunc("/team/deactivate", h.DeactivateTeam)
 	mux.HandleFunc("/users/setIsActive", h.SetUserActive)
 	mux.HandleFunc("/pullRequest/create", h.CreatePR)
 	mux.HandleFunc("/pullRequest/merge", h.MergePR)

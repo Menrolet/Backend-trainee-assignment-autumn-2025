@@ -141,6 +141,24 @@ components:
         status:
           type: string
           enum: [OPEN, MERGED]
+    DeactivateResult:
+      type: object
+      required:
+        - team_name
+        - deactivated_user_ids
+        - reassigned
+        - unassigned_left
+      properties:
+        team_name:
+          type: string
+        deactivated_user_ids:
+          type: array
+          items:
+            type: string
+        reassigned:
+          type: integer
+        unassigned_left:
+          type: integer
 
 paths:
   /team/add:
@@ -215,6 +233,41 @@ paths:
                   - user_id: u2
                     username: Bob
                     is_active: true
+        "404":
+          description: Команда не найдена
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /team/deactivate:
+    post:
+      tags: [Teams]
+      summary: Массово деактивировать пользователей команды и попытаться переназначить их в открытых PR
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [team_name]
+              properties:
+                team_name:
+                  type: string
+            example:
+              team_name: backend
+      responses:
+        "200":
+          description: Результат деактивации
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DeactivateResult"
+              example:
+                team_name: backend
+                deactivated_user_ids: [u2, u3]
+                reassigned: 1
+                unassigned_left: 1
         "404":
           description: Команда не найдена
           content:

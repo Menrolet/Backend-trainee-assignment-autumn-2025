@@ -128,6 +128,23 @@ func (r *PRsRepo) ListForReviewer(ctx context.Context, userID string) ([]model.P
 	return prs, nil
 }
 
+func (r *PRsRepo) RemoveReviewer(ctx context.Context, prID, userID string) error {
+	_, err := r.db.ExecContext(ctx, `
+        DELETE FROM pull_request_reviewers
+        WHERE pull_request_id=$1 AND user_id=$2
+    `, prID, userID)
+	return err
+}
+
+func (r *PRsRepo) AddReviewer(ctx context.Context, prID, userID string) error {
+	_, err := r.db.ExecContext(ctx, `
+        INSERT INTO pull_request_reviewers(pull_request_id, user_id)
+        VALUES ($1,$2)
+        ON CONFLICT DO NOTHING
+    `, prID, userID)
+	return err
+}
+
 func (r *PRsRepo) CountAssignmentsByReviewer(ctx context.Context) ([]model.ReviewerStat, error) {
 	rows, err := r.db.QueryContext(ctx, `
         SELECT user_id, COUNT(*) AS assigned_count

@@ -259,6 +259,30 @@ func (h *Handler) ReviewerStats(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+func (h *Handler) DeactivateTeam(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		writeError(w, http.StatusMethodNotAllowed, CodeNotFound, "method not allowed")
+		return
+	}
+	var req struct {
+		TeamName string `json:"team_name"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil || req.TeamName == "" {
+		writeError(w, http.StatusBadRequest, CodeNotFound, "team_name is required")
+		return
+	}
+	res, err := h.prs.DeactivateTeam(r.Context(), req.TeamName)
+	if err != nil {
+		if err == repository.ErrNotFound {
+			writeError(w, http.StatusNotFound, CodeNotFound, "resource not found")
+			return
+		}
+		writeError(w, http.StatusInternalServerError, CodeNotFound, err.Error())
+		return
+	}
+	writeJSON(w, http.StatusOK, res)
+}
+
 func writeJSON(w http.ResponseWriter, status int, payload any) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
