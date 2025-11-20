@@ -36,3 +36,9 @@ type PullRequest struct {
 	CreatedAt         time.Time  `json:"createdAt"`
 	MergedAt          *time.Time `json:"mergedAt"`
 }
+
+// ReviewerStat описывает количество назначений ревьюверов.
+type ReviewerStat struct {
+	UserID        string `json:"user_id"`
+	AssignedCount int    `json:"assigned_count"`
+}

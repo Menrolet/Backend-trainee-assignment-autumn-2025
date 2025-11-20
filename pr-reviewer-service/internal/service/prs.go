@@ -167,3 +167,7 @@ func (s *PRService) Reassign(ctx context.Context, prID, oldUserID string) (model
 func (s *PRService) ListByReviewer(ctx context.Context, userID string) ([]model.PullRequest, error) {
 	return s.prs.ListForReviewer(ctx, userID)
 }
+
+func (s *PRService) ReviewerStats(ctx context.Context) ([]model.ReviewerStat, error) {
+	return s.prs.CountAssignmentsByReviewer(ctx)
+}

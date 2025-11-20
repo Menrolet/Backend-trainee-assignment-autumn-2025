@@ -127,3 +127,29 @@ func (r *PRsRepo) ListForReviewer(ctx context.Context, userID string) ([]model.P
 	}
 	return prs, nil
 }
+
+func (r *PRsRepo) CountAssignmentsByReviewer(ctx context.Context) ([]model.ReviewerStat, error) {
+	rows, err := r.db.QueryContext(ctx, `
+        SELECT user_id, COUNT(*) AS assigned_count
+        FROM pull_request_reviewers
+        GROUP BY user_id
+        ORDER BY user_id
+    `)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var stats []model.ReviewerStat
+	for rows.Next() {
+		var s model.ReviewerStat
+		if err := rows.Scan(&s.UserID, &s.AssignedCount); err != nil {
+			return nil, err
+		}
+		stats = append(stats, s)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return stats, nil
+}

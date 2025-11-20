@@ -244,6 +244,21 @@ func (h *Handler) GetReviews(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+func (h *Handler) ReviewerStats(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		writeError(w, http.StatusMethodNotAllowed, CodeNotFound, "method not allowed")
+		return
+	}
+	stats, err := h.prs.ReviewerStats(r.Context())
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, CodeNotFound, err.Error())
+		return
+	}
+	writeJSON(w, http.StatusOK, map[string]any{
+		"reviewer_assignments": stats,
+	})
+}
+
 func writeJSON(w http.ResponseWriter, status int, payload any) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)

@@ -481,6 +481,37 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
 
+  /stats/reviewerAssignments:
+    get:
+      tags: [Users]
+      summary: Простая статистика — количество назначений по ревьюверам
+      responses:
+        "200":
+          description: Количество назначений для каждого ревьювера
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  reviewer_assignments:
+                    type: array
+                    items:
+                      type: object
+                      required:
+                        - user_id
+                        - assigned_count
+                      properties:
+                        user_id:
+                          type: string
+                        assigned_count:
+                          type: integer
+              example:
+                reviewer_assignments:
+                  - user_id: u2
+                    assigned_count: 3
+                  - user_id: u3
+                    assigned_count: 1
+
   /health:
     get:
       tags: [Health]

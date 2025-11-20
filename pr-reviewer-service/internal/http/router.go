@@ -15,6 +15,7 @@ func NewRouter(h *Handler) http.Handler {
 	mux.HandleFunc("/pullRequest/merge", h.MergePR)
 	mux.HandleFunc("/pullRequest/reassign", h.Reassign)
 	mux.HandleFunc("/users/getReview", h.GetReviews)
+	mux.HandleFunc("/stats/reviewerAssignments", h.ReviewerStats)
 
 	return mux
 }
