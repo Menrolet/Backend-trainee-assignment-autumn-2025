@@ -4,9 +4,9 @@
 
 ## Требования
 - Go 1.21+
-- PostgreSQL 15+ (для локального запуска)
-- Docker + Docker Compose (для поднятия одной командой)
-- make (опционально, для удобства)
+- PostgreSQL 15+ 
+- Docker + Docker Compose 
+- make 
 
 ## Быстрый старт (локально)
 1. Создай БД и примени миграцию:
@@ -16,8 +16,8 @@
    ```
 2. Запусти сервис:
    ```bash
-  go run ./cmd/server
-  ```
+   go run ./cmd/server
+   ```
    По умолчанию слушает `:8080` (переменная `HTTP_ADDR`), DSN берётся из `DATABASE_URL`.
 3. Проверка: `curl http://localhost:8080/health`.
 
@@ -57,6 +57,34 @@ docker compose up --build
 
   # Простая статистика назначений ревьюверов
   curl http://localhost:8080/stats/reviewerAssignments
+  ```
+
+## Нагрузочное тестирование (локально)
+- Подготовка данных (автор/команда):
+  ```bash
+  curl -X POST http://localhost:8080/team/add \
+    -H "Content-Type: application/json" \
+    -d '{"team_name":"backend","members":[{"user_id":"u1","username":"Alice","is_active":true},{"user_id":"u2","username":"Bob","is_active":true},{"user_id":"u3","username":"Carol","is_active":true}]}'
+  ```
+- `/health` (hey, 1000 req, 10 потоков): p95 ~0.8–1.1 ms, 0 ошибок.
+  ```bash
+  hey -n 1000 -c 10 http://localhost:8080/health
+  ```
+- `/pullRequest/create` (vegeta, 200 req, 20 rps, уникальные ID): p95 ~15.8 ms, 100% 201.
+  ```bash
+  mkdir -p /tmp/prbodies
+  for i in $(seq 0 199); do
+    printf '{"pull_request_id":"prZ%s","pull_request_name":"feat%s","author_id":"u1"}\n' "$i" "$i" > /tmp/prbodies/body$i.json
+  done
+  > /tmp/targets.txt
+  for i in $(seq 0 199); do
+    echo "POST http://localhost:8080/pullRequest/create" >> /tmp/targets.txt
+    echo "Content-Type: application/json" >> /tmp/targets.txt
+    echo "@/tmp/prbodies/body$i.json" >> /tmp/targets.txt
+    echo "" >> /tmp/targets.txt
+  done
+  vegeta attack -rate=20 -duration=10s -targets=/tmp/targets.txt -output=/tmp/vegeta.bin
+  vegeta report /tmp/vegeta.bin
   ```
 
 ## Допущения и заметки
